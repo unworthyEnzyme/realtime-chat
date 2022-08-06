@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 app.get("/", async (_, res) => {
-	res.send("hello world");
+	res.send("hello world!!");
 });
 
 app.use("/auth", authRouter);
