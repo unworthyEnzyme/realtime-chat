@@ -4,7 +4,9 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "ts-node-dev ./src/main.ts"
+		"dev": "ts-node-dev ./src/main.ts",
+		"migrate:dev": "prisma migrate dev",
+		"studio": "prisma studio"
 	},
 	"keywords": [],
 	"author": "",
