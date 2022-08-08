@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import express from "express";
 import { z } from "zod";
 import prisma from "../prisma";
+import { createSession } from "./session";
 
 type Result<T, E extends Error = Error> = [T, null] | [null, E];
 const safe = async <T>(callback: () => Promise<T>): Promise<Result<T>> => {
@@ -49,7 +50,19 @@ router.post("/signup", async (req, res) => {
 		res.status(400).json({ error: "The user already exists" });
 		return;
 	}
-	res.json({ id: user.id });
+	const [sessionInfo, sessionError] = await safe(() =>
+		createSession(user.username)
+	);
+	if (sessionError !== null) {
+		console.error(sessionError);
+	} else {
+		const { sessionId, expiresAt } = sessionInfo;
+		res.set(
+			"Set-Cookie",
+			`sessionId=${sessionId}; Expires=${expiresAt.toUTCString()}; HttpOnly; Secure; Path=/`
+		);
+	}
+	res.sendStatus(201);
 });
 
 const loginSchema = z.object({
@@ -82,9 +95,20 @@ router.post("/login", async (req, res) => {
 		res.status(400).json({ error: "Username or password is incorrect" });
 		return;
 	}
-	res.json({
-		data: user!.id /**If the password is verified then the user must exists */,
-	});
+	const [sessionInfo, sessionError] = await safe(() =>
+		/**If the password is verified then the user must exists */
+		createSession(user!.username)
+	);
+	if (sessionError !== null) {
+		console.error(sessionError);
+	} else {
+		const { sessionId, expiresAt } = sessionInfo;
+		res.set(
+			"Set-Cookie",
+			`sessionId=${sessionId}; Expires=${expiresAt.toUTCString()}; HttpOnly; Secure; Path=/`
+		);
+	}
+	res.sendStatus(200);
 });
 
 export default router;
