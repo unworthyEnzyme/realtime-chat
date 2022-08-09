@@ -4,12 +4,30 @@ import { z } from "zod";
 import prisma from "../prisma";
 import { createSession } from "./session";
 
-type Result<T, E extends Error = Error> = [T, null] | [null, E];
-const safe = async <T>(callback: () => Promise<T>): Promise<Result<T>> => {
+type Ok<T> = {
+	variant: "ok";
+	payload: T;
+};
+type Err<E = Error> = {
+	variant: "err";
+	payload: E;
+};
+type Result<T, E> = Ok<T> | Err<E>;
+
+// type Result<T, E extends Error = Error> = [T, null] | [null, E];
+const safe = async <T, E = Error>(
+	callback: () => Promise<T>
+): Promise<Result<T, E>> => {
 	try {
-		return [await callback(), null];
+		return {
+			variant: "ok",
+			payload: await callback(),
+		};
 	} catch (err) {
-		return [null, err as Error];
+		return {
+			variant: "err",
+			payload: err as E,
+		};
 	}
 };
 
@@ -26,18 +44,17 @@ const signupSchema = z.object({
 	password: z.string().min(1),
 });
 router.post("/signup", async (req, res) => {
-	const [data, parseError] = await safe(() =>
-		signupSchema.parseAsync(req.body)
-	);
-	if (parseError !== null) {
-		res.status(400).json({ error: parseError });
+	const parseResult = await safe(() => signupSchema.parseAsync(req.body));
+	if (parseResult.variant !== "ok") {
+		res.status(400).json({ error: parseResult.payload });
 		return;
 	}
+	const data = parseResult.payload;
 	const hashedPassword = await argon2.hash(data.password, {
 		type: argon2.argon2id,
 		memoryCost: 2 ** 16,
 	});
-	const [user, err2] = await safe(() =>
+	const userQueryResult = await safe(() =>
 		prisma.user.create({
 			data: {
 				email: data.email,
@@ -46,17 +63,16 @@ router.post("/signup", async (req, res) => {
 			},
 		})
 	);
-	if (err2 !== null) {
+	if (userQueryResult.variant !== "ok") {
 		res.status(400).json({ error: "The user already exists" });
 		return;
 	}
-	const [sessionInfo, sessionError] = await safe(() =>
-		createSession(user.username)
-	);
-	if (sessionError !== null) {
-		console.error(sessionError);
+	const user = userQueryResult.payload;
+	const sessionCreationResult = await safe(() => createSession(user.username));
+	if (sessionCreationResult.variant !== "ok") {
+		console.error(sessionCreationResult.payload);
 	} else {
-		const { sessionId, expiresAt } = sessionInfo;
+		const { sessionId, expiresAt } = sessionCreationResult.payload;
 		res.set(
 			"Set-Cookie",
 			`sessionId=${sessionId}; Expires=${expiresAt.toUTCString()}; HttpOnly; Secure; Path=/`
@@ -70,35 +86,35 @@ const loginSchema = z.object({
 	password: z.string().min(1 /**Make this bigger in the production */),
 });
 router.post("/login", async (req, res) => {
-	const [loginData, parseError] = await safe(() =>
-		loginSchema.parseAsync(req.body)
-	);
-	if (parseError !== null) {
-		res.status(400).json({ error: parseError });
+	const parseResult = await safe(() => loginSchema.parseAsync(req.body));
+	if (parseResult.variant !== "ok") {
+		res.status(400).json({ error: parseResult.payload });
 		return;
 	}
+	const loginData = parseResult.payload;
 	const user = await prisma.user.findUnique({
 		where: { username: loginData.username },
 	});
-	const [verified, verificationError] = await safe(() =>
+	const hashVerificationResult = await safe(() =>
 		/**
 		 * Because the right side of the nullish coalescing is an empty string is empty
 		 * it will throw that is why i use the `safe` function.
 		 */
 		argon2.verify(user?.password ?? "", loginData.password)
 	);
-	if (!verified || verificationError !== null) {
+	const verified = hashVerificationResult.payload;
+	if (!verified || hashVerificationResult.variant !== "ok") {
 		res.status(400).json({ error: "Username or password is incorrect" });
 		return;
 	}
-	const [sessionInfo, sessionError] = await safe(() =>
+	const sessionCreationResult = await safe(() =>
 		/**If the password is verified then the user must exists */
 		createSession(user!.username)
 	);
-	if (sessionError !== null) {
-		console.error(sessionError);
+	if (sessionCreationResult.variant !== "ok") {
+		console.error(sessionCreationResult.payload);
 	} else {
-		const { sessionId, expiresAt } = sessionInfo;
+		const { sessionId, expiresAt } = sessionCreationResult.payload;
 		res.set(
 			"Set-Cookie",
 			`sessionId=${sessionId}; Expires=${expiresAt.toUTCString()}; HttpOnly; Secure; Path=/`
