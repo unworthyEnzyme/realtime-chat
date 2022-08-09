@@ -111,4 +111,20 @@ router.post("/login", async (req, res) => {
 	res.sendStatus(200);
 });
 
+router.get("/me", async (req, res) => {
+	const sessionId = req.cookies.sessionId;
+	if (sessionId === undefined) {
+		res.sendStatus(401);
+		return;
+	}
+	const session = await prisma.session.findUnique({
+		where: { id: sessionId },
+	});
+	if (!session) {
+		res.sendStatus(401);
+		return;
+	}
+	res.json({ username: session.clientUsername });
+});
+
 export default router;
