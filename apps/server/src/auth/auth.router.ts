@@ -77,13 +77,9 @@ router.post("/login", async (req, res) => {
 		res.status(400).json({ error: parseError });
 		return;
 	}
-	const [user, internalError] = await safe(() =>
-		prisma.user.findUnique({ where: { username: loginData.username } })
-	);
-	if (internalError !== null) {
-		res.sendStatus(500);
-		return;
-	}
+	const user = await prisma.user.findUnique({
+		where: { username: loginData.username },
+	});
 	const [verified, verificationError] = await safe(() =>
 		/**
 		 * Because the right side of the nullish coalescing is an empty string is empty
