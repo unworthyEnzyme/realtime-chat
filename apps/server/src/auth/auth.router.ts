@@ -89,7 +89,7 @@ router.post("/login", async (req, res) => {
 		 * Because the right side of the short circuit is an empty string is empty
 		 * it will throw that is why i use the `safe` function.
 		 */
-		argon2.verify(user?.password || "", loginData.password)
+		argon2.verify(user?.password ?? "", loginData.password)
 	);
 	if (!verified || verificationError !== null) {
 		res.status(400).json({ error: "Username or password is incorrect" });
