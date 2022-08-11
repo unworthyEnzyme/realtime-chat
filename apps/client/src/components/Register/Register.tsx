@@ -1,3 +1,4 @@
+import axios from "axios";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
@@ -9,8 +10,13 @@ interface FormValues {
 
 const Register = () => {
 	const { register, handleSubmit } = useForm<FormValues>();
-	const onSubmit: SubmitHandler<FormValues> = (data) => {
-		console.log(data);
+	const onSubmit: SubmitHandler<FormValues> = async (data) => {
+		try {
+			const res = await axios.post("/api/auth/signup", data);
+			console.log(res);
+		} catch (err) {
+			console.error(err);
+		}
 	};
 	return (
 		<div>
