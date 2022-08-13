@@ -11,14 +11,12 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  username         String    @unique
-  email            String    @unique
-  password         String
-  createdAt        DateTime  @default(now())
-  sessions         Session[]
-  sentMessages     Message[] @relation("sender")
-  receivedMessages Message[] @relation("receiver")
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  sessions  Session[]
 }
 
 model Session {
@@ -27,15 +25,4 @@ model Session {
   clientUsername String
   createdAt      DateTime @default(now())
   expiresAt      DateTime
-}
-
-model Message {
-  id           Int      @id @default(autoincrement())
-  from         String
-  to           String
-  content      String
-  fromRelation User     @relation("sender", fields: [from], references: [username])
-  toRelation   User     @relation("receiver", fields: [to], references: [username])
-  createdAt    DateTime @default(now())
-  editetAt     DateTime @updatedAt
 }
