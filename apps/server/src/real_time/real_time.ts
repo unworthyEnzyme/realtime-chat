@@ -8,12 +8,15 @@ interface UserInfo {
 	username: string;
 }
 
-interface Message {
+interface OutgoingMessage {
 	from: string;
-	to: string;
 	content: string;
 }
 
+interface IncomingMessage {
+	to: string;
+	content: string;
+}
 export class Pusher {
 	private io: Server;
 	private activeUsers: Map<string, UserInfo>;
@@ -46,18 +49,19 @@ export class Pusher {
 				socket,
 				username: this.currentConnectionAttemptUsername!,
 			});
-			socket.on("message", async (message: string) => {
+			socket.on("message", async (message: IncomingMessage) => {
 				let receiver: UserInfo | null = null;
-				const parsedMessage = JSON.parse(message);
 				for (const activeUser of this.activeUsers.values()) {
-					if (activeUser.username === parsedMessage.to) {
-						console.log(activeUser.username);
+					if (activeUser.username === message.to) {
 						receiver = activeUser;
 						break;
 					}
 				}
-				parsedMessage.from = this.activeUsers.get(socket.id)?.username;
-				receiver?.socket.emit("message", parsedMessage);
+				const outgoingMessage: OutgoingMessage = {
+					from: this.activeUsers.get(socket.id)!.username,
+					content: message.content,
+				};
+				receiver?.socket.emit("message", outgoingMessage);
 			});
 			socket.on("disconnect", (reason) => {
 				this.activeUsers.delete(socket.id);
