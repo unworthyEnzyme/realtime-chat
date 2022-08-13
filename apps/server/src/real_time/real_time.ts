@@ -1,4 +1,5 @@
 import cookie from "cookie";
+import crypto from "crypto";
 import http from "http";
 import { Server, Socket } from "socket.io";
 import prisma from "../prisma";
@@ -9,6 +10,7 @@ interface UserInfo {
 }
 
 interface OutgoingMessage {
+	id: string;
 	from: string;
 	content: string;
 }
@@ -23,6 +25,11 @@ export class Pusher {
 	private currentConnectionAttemptUsername: string | null = null;
 	constructor(server: http.Server) {
 		this.io = new Server(server, {
+			cors: {
+				origin: "http://localhost:5173",
+				credentials: true,
+				allowedHeaders: ["Content-Type", "Cookie", "Set-Cookie"],
+			},
 			allowRequest: async (req, callback) => {
 				const sessionCookie = cookie.parse(req.headers.cookie || "");
 				const session = await prisma.session.findUnique({
@@ -58,6 +65,7 @@ export class Pusher {
 					}
 				}
 				const outgoingMessage: OutgoingMessage = {
+					id: crypto.randomBytes(16).toString("base64"),
 					from: this.activeUsers.get(socket.id)!.username,
 					content: message.content,
 				};
