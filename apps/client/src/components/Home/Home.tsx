@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { addMessage, getMessages, invalidateMessages } from "../../store/localForage";
 
 interface Message {
 	id: string;
 	from: string;
 	content: string;
 }
+
 const Home = () => {
 	const [socket, setSocket] = useState<Socket>();
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -21,11 +23,14 @@ const Home = () => {
 	}, []);
 
 	useEffect(() => {
-		socket?.emit("getAllMessages", (res: Message[]) => {
-			setMessages((messages) => [...res, ...messages]);
+		socket?.emit("getAllMessages", async (res: Message[]) => {
+			await invalidateMessages(res)
+			const freshMessages = await getMessages();
+			setMessages((messages) => [...messages, ...freshMessages]);
 		})
-		socket?.on("message", (message: Message) => {
-			setMessages((messages) => [message, ...messages]);
+		socket?.on("message", async (message: Message) => {
+			await addMessage(message)
+			setMessages((messages) => [...messages, message]);
 			console.log(message);
 		});
 	}, [socket]);
