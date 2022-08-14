@@ -57,11 +57,10 @@ export class Pusher {
 				username: this.currentConnectionAttemptUsername!,
 			});
 			socket.on("message", async (message: IncomingMessage) => {
-				let receiver: UserInfo | null = null;
+				let receivers: UserInfo[] = [];
 				for (const activeUser of this.activeUsers.values()) {
 					if (activeUser.username === message.to) {
-						receiver = activeUser;
-						break;
+						receivers.push(activeUser);
 					}
 				}
 				const outgoingMessage: OutgoingMessage = {
@@ -69,7 +68,9 @@ export class Pusher {
 					from: this.activeUsers.get(socket.id)!.username,
 					content: message.content,
 				};
-				receiver?.socket.emit("message", outgoingMessage);
+				for (const receiver of receivers) {
+					receiver?.socket.volatile.emit("message", outgoingMessage);
+				}
 			});
 			socket.on("disconnect", (reason) => {
 				this.activeUsers.delete(socket.id);
