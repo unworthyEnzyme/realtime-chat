@@ -9,6 +9,7 @@ interface Message {
 const Home = () => {
 	const [socket, setSocket] = useState<Socket>();
 	const [messages, setMessages] = useState<Message[]>([]);
+
 	useEffect(() => {
 		const socketInstance = io("ws://localhost:8000", {
 			withCredentials: true,
@@ -20,11 +21,15 @@ const Home = () => {
 	}, []);
 
 	useEffect(() => {
+		socket?.emit("getAllMessages", (res: Message[]) => {
+			setMessages((messages) => [...res, ...messages]);
+		})
 		socket?.on("message", (message: Message) => {
 			setMessages((messages) => [message, ...messages]);
 			console.log(message);
 		});
 	}, [socket]);
+
 	return (
 		<div>
 			{messages.map((message: Message) => (
