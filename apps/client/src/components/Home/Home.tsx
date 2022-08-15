@@ -30,7 +30,7 @@ const Home = () => {
 		socket?.emit("getAllMessages", async (res: Message[]) => {
 			await invalidateMessages(res);
 			const freshMessages = await getMessages();
-			setMessages((messages) => [...messages, ...freshMessages]);
+			setMessages(() => freshMessages);
 		});
 		socket?.on("message", async (message: Message) => {
 			await addMessage(message);
