@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 export function useIsAuthenticated() {
@@ -25,11 +25,15 @@ export function useIsAuthenticated() {
 	};
 }
 
+export const UsernameContext = React.createContext("");
+
 export default function Protected({ children }: { children: JSX.Element }) {
-	const { isAuthenticated } = useIsAuthenticated();
+	const { isAuthenticated, accountInfo } = useIsAuthenticated();
 
 	return isAuthenticated ? (
-		children
+		<UsernameContext.Provider value={accountInfo.username}>
+			{children}
+		</UsernameContext.Provider>
 	) : isAuthenticated === false ? (
 		<div>
 			<Navigate to="/login" replace={true} />
