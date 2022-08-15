@@ -73,32 +73,35 @@ export class Pusher {
 						data: {
 							fromUsername: outgoingMessage.from,
 							toUsername: message.to,
-							content: message.content
-						}
-					})
+							content: message.content,
+						},
+					});
 				}
 				for (const receiver of receivers) {
 					receiver?.socket.volatile.emit("message", outgoingMessage);
 				}
+				this.activeUsers
+					.get(socket.id)
+					?.socket.emit("message", outgoingMessage);
 			});
 			socket.on("getAllMessages", async (callback) => {
 				const latestMessages = await prisma.volatileMessage.findMany({
 					where: {
-						toUsername: this.activeUsers.get(socket.id)?.username
+						toUsername: this.activeUsers.get(socket.id)?.username,
 					},
 					select: {
 						id: true,
 						fromUsername: true,
 						content: true,
-					}
-				})
-				callback(latestMessages)
+					},
+				});
+				callback(latestMessages);
 				await prisma.volatileMessage.deleteMany({
 					where: {
-						toUsername: this.activeUsers.get(socket.id)?.username
-					}
-				})
-			})
+						toUsername: this.activeUsers.get(socket.id)?.username,
+					},
+				});
+			});
 			socket.on("disconnect", (reason) => {
 				this.activeUsers.delete(socket.id);
 			});
