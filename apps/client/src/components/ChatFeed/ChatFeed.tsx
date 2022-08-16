@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import useUsername from "../../hooks/useUsername";
 import {
@@ -20,11 +21,17 @@ interface OutgoingMessage {
 	content: string;
 }
 
-const PostMessage = ({ socket }: { socket: Socket | undefined }) => {
+const PostMessage = ({
+	socket,
+	friend,
+}: {
+	socket: Socket | undefined;
+	friend: string;
+}) => {
 	const { register, handleSubmit, reset } = useForm<{ content: string }>();
 	const onSubmit: SubmitHandler<{ content: string }> = (data) => {
 		const outgoingMessage: OutgoingMessage = {
-			to: "memo",
+			to: friend,
 			content: data.content,
 		};
 		console.log(socket);
@@ -66,6 +73,8 @@ const ChatMessage = ({ message }: { message: Message }) => {
 const ChatFeed = () => {
 	const [socket, setSocket] = useState<Socket>();
 	const [messages, setMessages] = useState<Message[]>([]);
+	const { friend } = useParams();
+	if (friend === undefined) throw new Error(":friend param is not defined");
 
 	useEffect(() => {
 		const socketInstance = io("ws://localhost:8000", {
@@ -79,12 +88,12 @@ const ChatFeed = () => {
 
 	useEffect(() => {
 		socket?.emit("getAllMessages", async (res: Message[]) => {
-			await invalidateMessages(res);
-			const freshMessages = await getMessages();
+			await invalidateMessages(res, friend);
+			const freshMessages = await getMessages(friend);
 			setMessages(() => freshMessages);
 		});
 		socket?.on("message", async (message: Message) => {
-			await addMessage(message);
+			await addMessage(message, friend);
 			setMessages((messages) => [...messages, message]);
 			console.log(message);
 		});
@@ -97,7 +106,7 @@ const ChatFeed = () => {
 					<ChatMessage message={message} key={message.id} />
 				))}
 			</div>
-			<PostMessage socket={socket} />
+			<PostMessage socket={socket} friend={friend} />
 		</div>
 	);
 };

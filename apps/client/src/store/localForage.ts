@@ -5,20 +5,27 @@ interface Message {
 	from: string;
 	content: string;
 }
-export const addMessage = async (message: Message) => {
+export const addMessage = async (message: Message, friendName: string) => {
 	const currentMessages: Message[] =
-		(await localforage.getItem("messages")) ?? [];
-	await localforage.setItem("messages", [...currentMessages, message]);
+		(await localforage.getItem(friendName)) ?? [];
+	await localforage.setItem(friendName, [...currentMessages, message]);
 };
 
-export const getMessages = async () => {
+export const getMessages = async (friendName: string) => {
 	const currentMessages: Message[] =
-		(await localforage.getItem("messages")) ?? [];
+		(await localforage.getItem(friendName)) ?? [];
 	return currentMessages;
 };
 
-export const invalidateMessages = async (messages: Message[]) => {
+export const invalidateMessages = async (
+	messages: Message[],
+	friendName: string
+) => {
 	const currentMessages: Message[] =
-		(await localforage.getItem("messages")) ?? [];
-	await localforage.setItem("messages", [...currentMessages, ...messages]);
+		(await localforage.getItem(friendName)) ?? [];
+	await localforage.setItem(friendName, [...currentMessages, ...messages]);
+};
+
+export const createChat = async (friendName: string) => {
+	await localforage.setItem(friendName, []);
 };
