@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { io, Socket } from "socket.io-client";
-import useUsername from "../../hooks/UseUsername";
+import useUsername from "../../hooks/useUsername";
 import {
 	addMessage,
 	getMessages,
