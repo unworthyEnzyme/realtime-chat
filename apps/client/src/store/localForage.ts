@@ -6,19 +6,19 @@ interface Message {
 	content: string;
 }
 export const addMessage = async (message: Message) => {
-    const currentMessages: Message[] = await localforage.getItem("messages") ?? [];
-    await localforage.setItem("messages", [...currentMessages, message]);
-}
+	const currentMessages: Message[] =
+		(await localforage.getItem("messages")) ?? [];
+	await localforage.setItem("messages", [...currentMessages, message]);
+};
 
 export const getMessages = async () => {
-    const currentMessages: Message[] = await localforage.getItem("messages") ?? [];
-    return currentMessages;
-}
+	const currentMessages: Message[] =
+		(await localforage.getItem("messages")) ?? [];
+	return currentMessages;
+};
 
 export const invalidateMessages = async (messages: Message[]) => {
-    const currentMessages: Message[] = await localforage.getItem("messages") ?? [];
-    await localforage.setItem("messages", [...currentMessages, ...messages]);
-}
-
-
-
+	const currentMessages: Message[] =
+		(await localforage.getItem("messages")) ?? [];
+	await localforage.setItem("messages", [...currentMessages, ...messages]);
+};
