@@ -88,6 +88,10 @@ const ChatFeed = () => {
 
 	useEffect(() => {
 		socket?.emit("getAllMessages", async (res: Message[]) => {
+			/**
+			 * Todo: This responds with all the messages, don't invalidate
+			 * a specif chat's data with all of them.
+			 */
 			await invalidateMessages(res, friend);
 			const freshMessages = await getMessages(friend);
 			setMessages(() => freshMessages);
