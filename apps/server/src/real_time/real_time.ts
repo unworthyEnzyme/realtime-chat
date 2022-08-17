@@ -74,7 +74,7 @@ export class Pusher {
 				socket,
 				username: this.currentConnectionAttemptUsername!,
 			});
-			socket.on("message", async (message: IncomingMessage) => {
+			socket.on("message", async (message: IncomingMessage, callback) => {
 				let receivers: UserInfo[] = [];
 				for (const activeUser of this.activeUsers.values()) {
 					if (activeUser.username === message.to) {
@@ -98,9 +98,10 @@ export class Pusher {
 				for (const receiver of receivers) {
 					receiver?.socket.volatile.emit("message", outgoingMessage);
 				}
-				this.activeUsers
-					.get(socket.id)
-					?.socket.emit("message", outgoingMessage);
+				if (callback) {
+					//Because i can't send a callback when testing with postman
+					callback(outgoingMessage);
+				}
 			});
 			socket.on("getAllMessages", async (callback) => {
 				const latestMessages = await prisma.volatileMessage.findMany({
