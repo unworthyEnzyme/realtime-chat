@@ -1,16 +1,13 @@
 import { Route, Routes } from "react-router-dom";
-import { LocalStorage } from "../../store/localForage";
+import { DB } from "../../store/localForage";
 import ChatFeed from "../ChatFeed/ChatFeed";
 const Home = () => {
-	const localStorage = new LocalStorage();
-	localStorage.init();
+	const db = new DB();
+	db.init();
 	return (
 		<Routes>
 			{/* You should validate this path whether it exists in the indexedDB */}
-			<Route
-				path="/chat-with/:friend"
-				element={<ChatFeed localStorage={localStorage} />}
-			/>
+			<Route path="/chat-with/:friend" element={<ChatFeed db={db} />} />
 			<Route path="/chats" element={<div>empty for now</div>} />
 		</Routes>
 	);

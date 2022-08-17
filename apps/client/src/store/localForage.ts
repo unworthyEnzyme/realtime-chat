@@ -11,7 +11,7 @@ interface OutgoingMessage {
 	to: string;
 	content: string;
 }
-export class LocalStorage extends EventTarget {
+export class DB extends EventTarget {
 	private socket: Socket;
 	constructor() {
 		super();

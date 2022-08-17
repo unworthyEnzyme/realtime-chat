@@ -3,7 +3,7 @@ import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import useUsername from "../../hooks/useUsername";
-import { LocalStorage } from "../../store/localForage";
+import { DB } from "../../store/localForage";
 
 interface Message {
 	id: string;
@@ -19,11 +19,11 @@ interface OutgoingMessage {
 const PostMessage = ({
 	friend,
 	setMessages,
-	localStorage,
+	db,
 }: {
 	friend: string;
 	setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-	localStorage: LocalStorage;
+	db: DB;
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ content: string }>();
 
@@ -32,9 +32,9 @@ const PostMessage = ({
 			to: friend,
 			content: data.content,
 		};
-		const res = await localStorage.sendMessage(outgoingMessage);
+		const res = await db.sendMessage(outgoingMessage);
 		setMessages((currentMessages) => [...currentMessages, res]);
-		localStorage.insertMessage(res, friend);
+		db.insertMessage(res, friend);
 		reset();
 	};
 	return (
@@ -69,7 +69,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
 	);
 };
 
-const ChatFeed = ({ localStorage }: { localStorage: LocalStorage }) => {
+const ChatFeed = ({ db }: { db: DB }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const { friend } = useParams();
 	if (friend === undefined) throw new Error(":friend param is not defined");
@@ -80,9 +80,9 @@ const ChatFeed = ({ localStorage }: { localStorage: LocalStorage }) => {
 		}
 	};
 	useEffect(() => {
-		localStorage.addEventListener(`message-from-${friend}`, listener);
+		db.addEventListener(`message-from-${friend}`, listener);
 		return () => {
-			localStorage.removeEventListener(`message-from-${friend}`, listener);
+			db.removeEventListener(`message-from-${friend}`, listener);
 		};
 	}, [friend, listener]);
 
@@ -93,11 +93,7 @@ const ChatFeed = ({ localStorage }: { localStorage: LocalStorage }) => {
 					<ChatMessage message={message} key={message.id} />
 				))}
 			</div>
-			<PostMessage
-				friend={friend}
-				setMessages={setMessages}
-				localStorage={localStorage}
-			/>
+			<PostMessage friend={friend} setMessages={setMessages} db={db} />
 		</div>
 	);
 };
