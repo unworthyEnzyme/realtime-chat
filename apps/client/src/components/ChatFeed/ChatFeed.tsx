@@ -2,13 +2,8 @@ import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
 import useUsername from "../../hooks/useUsername";
-import {
-	addMessage,
-	getMessages,
-	invalidateMessages,
-} from "../../store/localForage";
+import { LocalStorage } from "../../store/localForage";
 
 interface Message {
 	id: string;
@@ -22,20 +17,24 @@ interface OutgoingMessage {
 }
 
 const PostMessage = ({
-	socket,
 	friend,
+	setMessages,
+	localStorage,
 }: {
-	socket: Socket | undefined;
 	friend: string;
+	setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+	localStorage: LocalStorage;
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ content: string }>();
-	const onSubmit: SubmitHandler<{ content: string }> = (data) => {
+
+	const onSubmit: SubmitHandler<{ content: string }> = async (data) => {
 		const outgoingMessage: OutgoingMessage = {
 			to: friend,
 			content: data.content,
 		};
-		console.log(socket);
-		socket?.emit("message", outgoingMessage);
+		const res = await localStorage.sendMessage(outgoingMessage);
+		setMessages((currentMessages) => [...currentMessages, res]);
+		localStorage.insertMessage(res, friend);
 		reset();
 	};
 	return (
@@ -70,38 +69,22 @@ const ChatMessage = ({ message }: { message: Message }) => {
 	);
 };
 
-const ChatFeed = () => {
-	const [socket, setSocket] = useState<Socket>();
+const ChatFeed = ({ localStorage }: { localStorage: LocalStorage }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const { friend } = useParams();
 	if (friend === undefined) throw new Error(":friend param is not defined");
-
+	const listener = (e: Event) => {
+		if (e instanceof CustomEvent) {
+			const message = e.detail as Message;
+			setMessages((currentMessages) => [...currentMessages, message]);
+		}
+	};
 	useEffect(() => {
-		const socketInstance = io("ws://localhost:8000", {
-			withCredentials: true,
-		});
-		setSocket(() => socketInstance);
+		localStorage.addEventListener(`message-from-${friend}`, listener);
 		return () => {
-			socketInstance.disconnect();
+			localStorage.removeEventListener(`message-from-${friend}`, listener);
 		};
-	}, []);
-
-	useEffect(() => {
-		socket?.emit("getAllMessages", async (res: Message[]) => {
-			/**
-			 * Todo: This responds with all the messages, don't invalidate
-			 * a specif chat's data with all of them.
-			 */
-			await invalidateMessages(res, friend);
-			const freshMessages = await getMessages(friend);
-			setMessages(() => freshMessages);
-		});
-		socket?.on("message", async (message: Message) => {
-			await addMessage(message, friend);
-			setMessages((messages) => [...messages, message]);
-			console.log(message);
-		});
-	}, [socket]);
+	}, [friend, listener]);
 
 	return (
 		<div>
@@ -110,7 +93,11 @@ const ChatFeed = () => {
 					<ChatMessage message={message} key={message.id} />
 				))}
 			</div>
-			<PostMessage socket={socket} friend={friend} />
+			<PostMessage
+				friend={friend}
+				setMessages={setMessages}
+				localStorage={localStorage}
+			/>
 		</div>
 	);
 };
