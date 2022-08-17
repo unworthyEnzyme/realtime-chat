@@ -1,8 +1,26 @@
 import cookie from "cookie";
 import crypto from "crypto";
+import { Router } from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
 import prisma from "../prisma";
+
+export const realTimeRouter = Router();
+
+realTimeRouter.get("/ping-user/:username", async (req, res) => {
+	//I need this to check if i am able to chat with this user on the client.
+	const username = req.params.username;
+	const user = await prisma.user.findUnique({
+		where: {
+			username,
+		},
+	});
+	if (!user) {
+		res.sendStatus(404);
+		return;
+	}
+	res.sendStatus(200);
+});
 
 interface UserInfo {
 	socket: Socket;
