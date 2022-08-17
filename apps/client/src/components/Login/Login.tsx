@@ -1,4 +1,5 @@
 import axios from "axios";
+import localforage from "localforage";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
@@ -12,7 +13,7 @@ const Register = () => {
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		try {
 			const res = await axios.post("/api/auth/login", data);
-			console.log(res);
+			localforage.setItem("username", data.username);
 		} catch (err) {
 			console.error(err);
 		}
