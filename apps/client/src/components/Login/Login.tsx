@@ -2,6 +2,7 @@ import axios from "axios";
 import localforage from "localforage";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 interface FormValues {
 	username: string;
@@ -10,10 +11,12 @@ interface FormValues {
 
 const Register = () => {
 	const { register, handleSubmit } = useForm<FormValues>();
+	const navigate = useNavigate();
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		try {
-			const res = await axios.post("/api/auth/login", data);
+			await axios.post("/api/auth/login", data);
 			localforage.setItem("username", data.username);
+			navigate("/app/chats");
 		} catch (err) {
 			console.error(err);
 		}
