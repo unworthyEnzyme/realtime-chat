@@ -23,7 +23,7 @@ export class DB extends EventTarget {
 		this.socket.on("message", async (message: Message) => {
 			const username: string = (await localforage.getItem("username"))!;
 			if (username !== message.from) {
-				this.addMessage(message, message.from);
+				await this.addMessage(message, message.from);
 			}
 		});
 	}

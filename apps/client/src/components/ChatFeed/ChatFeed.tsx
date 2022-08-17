@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -34,7 +34,7 @@ const PostMessage = ({
 		};
 		const res = await db.sendMessage(outgoingMessage);
 		setMessages((currentMessages) => [...currentMessages, res]);
-		db.insertMessage(res, friend);
+		await db.insertMessage(res, friend);
 		reset();
 	};
 	return (

@@ -15,7 +15,7 @@ const Register = () => {
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		try {
 			await axios.post("/api/auth/login", data);
-			localforage.setItem("username", data.username);
+			await localforage.setItem("username", data.username);
 			navigate("/app/chats");
 		} catch (err) {
 			console.error(err);
