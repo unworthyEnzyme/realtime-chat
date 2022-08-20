@@ -40,7 +40,7 @@ const PostMessage = ({
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="w-full flex gap-3 justify-around my-2"
+			className="w-full flex gap-3 justify-around"
 		>
 			<input
 				type="text"
@@ -93,12 +93,14 @@ const ChatFeed = ({ db }: { db: DB }) => {
 
 	return (
 		<div>
-			<div className="flex flex-col w-full min-h-full items-start">
+			<div className="flex flex-col w-full min-h-full items-start overflow-y-auto">
 				{messages.map((message: Message) => (
 					<ChatMessage message={message} key={message.id} />
 				))}
 			</div>
-			<PostMessage friend={friend} setMessages={setMessages} db={db} />
+			<div className="w-full sticky bottom-0 p-1 bg-white">
+				<PostMessage friend={friend} setMessages={setMessages} db={db} />
+			</div>
 		</div>
 	);
 };
