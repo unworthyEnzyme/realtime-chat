@@ -98,7 +98,7 @@ const ChatFeed = ({ db }: { db: DB }) => {
 
 	return (
 		<div className="min-h-screen flex flex-col">
-			<div className="flex flex-col w-full items-start grow overflow-y-auto">
+			<div className="flex flex-col w-full items-start justify-end grow overflow-y-auto">
 				{messages.map((message: Message) => (
 					<ChatMessage message={message} key={message.id} />
 				))}
