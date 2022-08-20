@@ -76,4 +76,8 @@ export class DB extends EventTarget {
 			throw err;
 		}
 	}
+
+	async getAllChatMessages(friendName: string): Promise<Message[]> {
+		return (await localforage.getItem(friendName)) ?? [];
+	}
 }

@@ -79,6 +79,11 @@ const ChatFeed = ({ db }: { db: DB }) => {
 			setMessages((currentMessages) => [...currentMessages, message]);
 		}
 	};
+
+	useEffect(() => {
+		db.getAllChatMessages(friend).then((messages) => setMessages(messages));
+	}, [db]);
+
 	useEffect(() => {
 		db.addEventListener(`message-from-${friend}`, listener);
 		return () => {
