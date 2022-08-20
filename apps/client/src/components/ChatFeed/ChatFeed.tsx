@@ -110,4 +110,23 @@ const ChatFeed = ({ db }: { db: DB }) => {
 	);
 };
 
-export default ChatFeed;
+const CheckIfChatExists = ({ db }: { db: DB }) => {
+	const { friend } = useParams();
+	if (friend === undefined) throw new Error(":friend param is not defined");
+
+	const [chatExists, setChatExists] = useState<boolean>();
+
+	useEffect(() => {
+		db.checkIfChatExists(friend).then((exists) => setChatExists(exists));
+	}, [db]);
+
+	return chatExists === undefined ? (
+		<div>Loading...</div>
+	) : chatExists ? (
+		<ChatFeed db={db} />
+	) : (
+		<div>Chat does not exist</div>
+	);
+};
+
+export default CheckIfChatExists;

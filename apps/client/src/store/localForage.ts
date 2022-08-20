@@ -87,4 +87,8 @@ export class DB extends EventTarget {
 	async getAllChatMessages(friendName: string): Promise<Message[]> {
 		return (await localforage.getItem(friendName)) ?? [];
 	}
+
+	async checkIfChatExists(friendName: string) {
+		return !!(await localforage.getItem(friendName));
+	}
 }
