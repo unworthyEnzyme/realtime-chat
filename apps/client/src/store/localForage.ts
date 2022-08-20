@@ -54,8 +54,15 @@ export class DB extends EventTarget {
 		const chatNames = (await localforage.keys()).filter(
 			(key) => key !== "username"
 		);
-		//TODO: Get the latest messages and return that and the `chatNames` as an object.
-		return chatNames;
+		let chatsInfo: { friendName: string; lastMessage: string }[] = [];
+		for (const chatName of chatNames) {
+			const lastMessage = (await this.getAllChatMessages(chatName)).pop();
+			chatsInfo.push({
+				friendName: chatName,
+				lastMessage: lastMessage?.content ?? "",
+			});
+		}
+		return chatsInfo;
 	}
 
 	async createChat(name: string) {

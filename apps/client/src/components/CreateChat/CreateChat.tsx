@@ -6,7 +6,9 @@ import type { DB } from "../../store/localForage";
 
 interface IProps {
 	db: DB;
-	setChats: React.Dispatch<React.SetStateAction<string[]>>;
+	setChats: React.Dispatch<
+		React.SetStateAction<{ friendName: string; lastMessage: string }[]>
+	>;
 }
 
 const delayed = (ms: number, callback: () => void) =>
@@ -27,7 +29,10 @@ const CreateChat = ({ db, setChats }: IProps) => {
 		try {
 			await db.createChat(name);
 			console.log("Chat created");
-			setChats((currentChats) => [name, ...currentChats]);
+			setChats((currentChats) => [
+				{ friendName: name, lastMessage: "" },
+				...currentChats,
+			]);
 			setResult({ variant: "ok", detail: "Chat created" });
 			delayed(300, () => {
 				clearFormState();
