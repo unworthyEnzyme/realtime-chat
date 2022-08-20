@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import authRouter from "./auth/auth.router";
-import { Pusher } from "./real_time/real_time";
+import { Pusher, realTimeRouter } from "./real_time/real_time";
 
 const app = express();
 const server = http.createServer(app);
@@ -19,5 +19,6 @@ app.get("/", async (_, res) => {
 app.use("/auth", authRouter);
 const pusher = new Pusher(server);
 pusher.init();
+app.use("/real-time", realTimeRouter);
 
 server.listen(8000, () => console.log("http://localhost:8000"));

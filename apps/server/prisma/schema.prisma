@@ -11,14 +11,13 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  username         String    @unique
-  email            String    @unique
-  password         String
-  createdAt        DateTime  @default(now())
-  sessions         Session[]
-  sentMessages     Message[] @relation("sender")
-  receivedMessages Message[] @relation("receiver")
+  id              Int               @id @default(autoincrement())
+  username        String            @unique
+  email           String            @unique
+  password        String
+  createdAt       DateTime          @default(now())
+  sessions        Session[]
+  VolatileMessage VolatileMessage[]
 }
 
 model Session {
@@ -29,13 +28,11 @@ model Session {
   expiresAt      DateTime
 }
 
-model Message {
+model VolatileMessage {
   id           Int      @id @default(autoincrement())
-  from         String
-  to           String
+  fromUsername String
+  toUsername   String
+  to           User     @relation(fields: [toUsername], references: [username])
   content      String
-  fromRelation User     @relation("sender", fields: [from], references: [username])
-  toRelation   User     @relation("receiver", fields: [to], references: [username])
   createdAt    DateTime @default(now())
-  editetAt     DateTime @updatedAt
 }
