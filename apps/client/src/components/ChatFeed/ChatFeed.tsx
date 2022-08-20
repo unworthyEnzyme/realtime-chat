@@ -85,6 +85,11 @@ const ChatFeed = ({ db }: { db: DB }) => {
 	}, [db]);
 
 	useEffect(() => {
+		//TODO Don't scroll to the bottom if the user is not at the bottom already.
+		window.scrollTo(0, document.body.scrollHeight);
+	}, [messages]);
+
+	useEffect(() => {
 		db.addEventListener(`message-from-${friend}`, listener);
 		return () => {
 			db.removeEventListener(`message-from-${friend}`, listener);
