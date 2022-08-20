@@ -1,3 +1,4 @@
+import axios from "axios";
 import localforage from "localforage";
 import { io, Socket } from "socket.io-client";
 
@@ -42,10 +43,37 @@ export class DB extends EventTarget {
 		await localforage.setItem(friendName, [...currentMessages, message]);
 	}
 	sendMessage(message: OutgoingMessage): Promise<Message> {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			this.socket.emit("message", message, (res: Message) => {
 				resolve(res);
 			});
 		});
+	}
+
+	async getAllChatsInfo() {
+		const chatNames = (await localforage.keys()).filter(
+			(key) => key !== "username"
+		);
+		//TODO: Get the latest messages and return that and the `chatNames` as an object.
+		return chatNames;
+	}
+
+	async createChat(name: string) {
+		try {
+			try {
+				await axios.get(`/api/real-time/ping-user/${name}`);
+			} catch (err) {
+				throw new Error("User does not exist");
+			}
+			if ((await localforage.getItem(name)) !== null) {
+				throw new Error("Chat already exists");
+			}
+			if (name === (await localforage.getItem("username"))) {
+				throw new Error("You can't chat with yourself");
+			}
+			await localforage.setItem(name, []);
+		} catch (err) {
+			throw err;
+		}
 	}
 }
