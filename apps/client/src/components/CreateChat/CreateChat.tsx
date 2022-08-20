@@ -2,6 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { AiOutlineMessage } from "react-icons/ai";
 import type { DB } from "../../store/localForage";
 
 interface IProps {
@@ -52,7 +53,9 @@ const CreateChat = ({ db, setChats }: IProps) => {
 				setIsOpen(open);
 			}}
 		>
-			<Dialog.Trigger>+</Dialog.Trigger>
+			<Dialog.Trigger className="w-12 h-12 fixed bottom-4 right-4 bg-green-500 active:bg-green-600 hover:bg-green-600 rounded-full text-white flex justify-center items-center">
+				<AiOutlineMessage className="w-1/2 h-1/2" />
+			</Dialog.Trigger>
 			<Dialog.Portal>
 				<Dialog.Overlay className="bg-black opacity-30 fixed inset-0" />
 				<Dialog.Content className="bg-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
