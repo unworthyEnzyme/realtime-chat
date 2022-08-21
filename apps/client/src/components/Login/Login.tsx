@@ -22,19 +22,26 @@ const Register = () => {
 		}
 	};
 	return (
-		<div>
-			<form onSubmit={handleSubmit(onSubmit)}>
+		<div className="flex justify-center items-center h-screen">
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className="aspect-square flex flex-col items-start justify-center gap-2 p-6 rounded-md border border-gray-400"
+			>
 				<input
 					type="text"
 					placeholder="Your username"
 					{...register("username")}
+					className="border border-gray-400 rounded-md p-2 focus:scale-105 transition-transform ease-in-out"
 				/>
 				<input
 					type="password"
 					placeholder="Your password"
 					{...register("password")}
+					className="border border-gray-400 rounded-md p-2 focus:scale-105 transition-transform ease-in-out"
 				/>
-				<button>Login</button>
+				<button className="rounded-full py-2 px-4 text-white bg-green-500 self-start focus:scale-105 transition-transform ease-in-out">
+					Login
+				</button>
 			</form>
 		</div>
 	);
