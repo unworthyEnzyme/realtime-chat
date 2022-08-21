@@ -13,13 +13,20 @@ interface OutgoingMessage {
 	content: string;
 }
 export class DB extends EventTarget {
-	private socket: Socket;
+	private _socket?: Socket;
 	constructor() {
 		super();
-		this.socket = io("ws://localhost:8000", {
-			withCredentials: true,
-		});
 	}
+
+	private get socket() {
+		if (!this._socket) {
+			this._socket = io("ws://localhost:8000", {
+				withCredentials: true,
+			});
+		}
+		return this._socket;
+	}
+
 	init() {
 		this.socket.on("message", async (message: Message) => {
 			const username: string = (await localforage.getItem("username"))!;
