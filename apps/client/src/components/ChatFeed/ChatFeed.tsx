@@ -3,7 +3,7 @@ import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import useUsername from "../../hooks/useUsername";
-import { DB } from "../../store/localForage";
+import { DB } from "../../store/DB";
 
 interface Message {
 	id: string;

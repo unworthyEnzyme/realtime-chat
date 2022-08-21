@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { AiOutlineMessage } from "react-icons/ai";
-import type { DB } from "../../store/localForage";
+import type { DB } from "../../store/DB";
 
 interface IProps {
 	db: DB;

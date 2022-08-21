@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DB } from "../../store/localForage";
+import { DB } from "../../store/DB";
 import CreateChat from "../CreateChat/CreateChat";
 
 const Chats = ({ db }: { db: DB }) => {

@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { DB } from "../../store/localForage";
+import { DB } from "../../store/DB";
 import ChatFeed from "../ChatFeed/ChatFeed";
 import Chats from "../Chats/Chats";
 
