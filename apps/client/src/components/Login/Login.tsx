@@ -9,7 +9,7 @@ interface FormValues {
 	password: string;
 }
 
-const Register = () => {
+const Login = () => {
 	const { register, handleSubmit } = useForm<FormValues>();
 	const navigate = useNavigate();
 	const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -47,4 +47,4 @@ const Register = () => {
 	);
 };
 
-export default Register;
+export default Login;
