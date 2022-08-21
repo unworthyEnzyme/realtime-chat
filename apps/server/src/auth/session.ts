@@ -6,7 +6,7 @@ import prisma from "../prisma";
 
 export const createSession = async (username: string) => {
 	// ! Timezone is not correct.
-	const expirationDate = add(new Date(), { days: 1 });
+	const expirationDate = add(new Date(), { days: 7 });
 	const sessionId = crypto.randomBytes(16).toString("base64");
 	const session = await prisma.session.create({
 		data: {
