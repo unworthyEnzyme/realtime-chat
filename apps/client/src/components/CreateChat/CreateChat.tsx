@@ -58,9 +58,14 @@ const CreateChat = ({ db, setChats }: IProps) => {
 			</Dialog.Trigger>
 			<Dialog.Portal>
 				<Dialog.Overlay className="bg-black opacity-30 fixed inset-0" />
-				<Dialog.Content className="bg-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+				<Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 					<form onSubmit={handleSubmit(onSubmit)}>
-						<input type="text" {...register("name")} />
+						<input
+							type="text"
+							{...register("name")}
+							placeholder="Your friend's name"
+							className="rounded-md p-2 focus:scale-105 transition-transform ease-in-out outline-none focus:outline outline-1 outline-black outline-offset-1"
+						/>
 						{result && <p>{result.detail}</p>}
 					</form>
 				</Dialog.Content>
