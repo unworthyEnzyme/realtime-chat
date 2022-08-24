@@ -3,10 +3,8 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
-	"type": "module",
 	"scripts": {
-		"bundle:watch": "esbuild ./src/main.ts --format=esm --outdir=dist --platform=node --bundle --watch --sourcemap --target=node18 --external:./node_modules/*",
-		"run:watch": "nodemon ./dist/main.js",
+		"dev": "ts-node-dev src/main.ts",
 		"migrate:dev": "prisma migrate dev",
 		"studio": "prisma studio"
 	},
