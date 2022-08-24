@@ -12,6 +12,9 @@ const Chats = ({ db }: { db: DB }) => {
 			.then((chat) => setChats(chat))
 			.catch((err) => console.log(err));
 	}, [db]);
+
+	//BUG: If someone messages me and i don't have contact to him
+	// i don't see anything about it.
 	return (
 		<div>
 			{chats.map((chat) => (
