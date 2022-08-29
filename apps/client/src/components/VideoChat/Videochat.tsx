@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import type { DB } from "../../store/DB";
 
-const rc = new RTCPeerConnection({
-	iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-});
-
-const lc = new RTCPeerConnection({
-	iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-});
+const rc = new RTCPeerConnection();
 
 const VideoChat = ({ db }: { db: DB }) => {
 	const [to, setTo] = useState("");
@@ -16,9 +10,12 @@ const VideoChat = ({ db }: { db: DB }) => {
 		sdp: string;
 	}>();
 
+	const [offer, setOffer] = useState("");
+
 	//receiver
 	const offerListener = async (offer: { from: string; sdp: string }) => {
 		setSomeoneICalling(offer);
+		setOffer(offer.sdp);
 	};
 	const acceptOffer = async () => {
 		rc.onicecandidate = (e) => {
@@ -30,7 +27,7 @@ const VideoChat = ({ db }: { db: DB }) => {
 			channel.onmessage = (e) => console.log("new message: ", e.data);
 			channel.onopen = () => console.log("[receiver] connection opened");
 		};
-		await rc.setRemoteDescription(JSON.parse(someoneIsCalling!.sdp));
+		await rc.setRemoteDescription(JSON.parse(offer));
 		const answer = await rc.createAnswer();
 		await rc.setLocalDescription(answer);
 		console.log("[receiver] answer created", answer);
@@ -45,25 +42,25 @@ const VideoChat = ({ db }: { db: DB }) => {
 
 	//caller
 	const createOffer = async () => {
-		const dc = lc.createDataChannel("channel");
+		const dc = rc.createDataChannel("channel");
 		dc.onmessage = (e) => console.log("Message: ", e.data);
 		dc.onopen = () => console.log("connection opened");
-		lc.onicecandidate = (e) => {
-			console.log("[caller] new ice candidate: ", lc.localDescription);
+		rc.onicecandidate = (e) => {
+			console.log("[caller] new ice candidate: ", rc.localDescription);
+			db.socket.emit(
+				"send-offer",
+				{ to, sdp: JSON.stringify(rc.localDescription) },
+				(info: { err: boolean; msg: string }) => {
+					console.log(info);
+				}
+			);
 		};
-		const offer = await lc.createOffer();
-		await lc.setLocalDescription(offer);
+		const _offer = await rc.createOffer();
+		await rc.setLocalDescription(_offer);
 		console.log("[caller] local description is set");
-		db.socket.emit(
-			"send-offer",
-			{ to, sdp: JSON.stringify(offer) },
-			(info: { err: boolean; msg: string }) => {
-				console.log(info);
-			}
-		);
 	};
 	const answerListener = async (answer: { from: string; sdp: string }) => {
-		await lc.setRemoteDescription(JSON.parse(answer.sdp));
+		await rc.setRemoteDescription(JSON.parse(answer.sdp));
 		console.log(answer);
 	};
 
