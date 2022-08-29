@@ -121,7 +121,56 @@ export class Pusher {
 					},
 				});
 			});
-			socket.on("disconnect", (reason) => {
+
+			socket.on(
+				"send-offer",
+				async (offer: { to: string; sdp: string }, callback: any) => {
+					let receivers: UserInfo[] = [];
+					for (const activeUser of this.activeUsers.values()) {
+						if (activeUser.username === offer.to) {
+							receivers.push(activeUser);
+						}
+					}
+					if (receivers.length === 0) {
+						callback({ err: true, msg: "User is down" });
+						return;
+					}
+					const outgoingOffer = {
+						from: this.activeUsers.get(socket.id)!.username,
+						sdp: offer.sdp,
+					};
+					for (const receiver of receivers) {
+						receiver.socket.emit("offer", outgoingOffer);
+					}
+					callback({ err: false, msg: "Offer is sent" });
+				}
+			);
+
+			socket.on(
+				"send-answer",
+				async (answer: { to: string; sdp: string }, callback) => {
+					let receivers: UserInfo[] = [];
+					for (const activeUser of this.activeUsers.values()) {
+						if (activeUser.username === answer.to) {
+							receivers.push(activeUser);
+						}
+					}
+					if (receivers.length === 0) {
+						callback({ err: true, msg: "User is down" });
+						return;
+					}
+					const outgoingAnswer = {
+						from: this.activeUsers.get(socket.id)!.username,
+						sdp: answer.sdp,
+					};
+					for (const receiver of receivers) {
+						receiver.socket.emit("answer", outgoingAnswer);
+					}
+					callback({ err: false, msg: "Answer is sent" });
+				}
+			);
+
+			socket.conn.on("close", () => {
 				this.activeUsers.delete(socket.id);
 			});
 		});

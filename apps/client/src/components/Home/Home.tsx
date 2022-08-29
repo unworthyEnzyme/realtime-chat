@@ -11,7 +11,7 @@ const Home = () => {
 		<Routes>
 			<Route path="/chat-with/:friend" element={<ChatFeed db={db} />} />
 			<Route path="/chats" element={<Chats db={db} />} />
-			<Route path="/video-chat" element={<VideoChat />} />
+			<Route path="/video-chat" element={<VideoChat db={db} />} />
 		</Routes>
 	);
 };

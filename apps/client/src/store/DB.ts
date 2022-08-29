@@ -18,7 +18,7 @@ export class DB extends EventTarget {
 		super();
 	}
 
-	private get socket() {
+	get socket() {
 		if (!this._socket) {
 			this._socket = io("ws://localhost:8000", {
 				withCredentials: true,
