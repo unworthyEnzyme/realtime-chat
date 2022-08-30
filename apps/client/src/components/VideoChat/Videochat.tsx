@@ -25,7 +25,10 @@ const VideoChat = ({ db }: { db: DB }) => {
 		rc.ondatachannel = (e) => {
 			channel = e.channel;
 			channel.onmessage = (e) => console.log("new message: ", e.data);
-			channel.onopen = () => console.log("[receiver] connection opened");
+			channel.onopen = () => {
+				console.log("[receiver] connection opened");
+				setSomeoneICalling(undefined);
+			};
 		};
 		await rc.setRemoteDescription(JSON.parse(offer));
 		const answer = await rc.createAnswer();
