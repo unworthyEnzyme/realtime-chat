@@ -47,7 +47,12 @@ const VideoChat = ({ db }: { db: DB }) => {
 	const createOffer = async () => {
 		const dc = rc.createDataChannel("channel");
 		dc.onmessage = (e) => console.log("Message: ", e.data);
-		dc.onopen = () => console.log("connection opened");
+		dc.onopen = () => {
+			console.log("connection opened");
+			setInterval(() => {
+				dc.send("helloo");
+			}, 200);
+		};
 		rc.onicecandidate = (e) => {
 			console.log("[caller] new ice candidate: ", rc.localDescription);
 			db.socket.emit(
