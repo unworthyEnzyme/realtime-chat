@@ -18,6 +18,20 @@ const VideoChat = ({ db }: { db: DB }) => {
 		setOffer(offer.sdp);
 	};
 	const acceptOffer = async () => {
+		const localStream = await navigator.mediaDevices.getDisplayMedia({
+			audio: true,
+			video: true,
+		});
+		const video = document.getElementById("video-el") as HTMLVideoElement;
+		const tracks = localStream.getTracks();
+		tracks.forEach((track) => {
+			rc.addTrack(track, localStream);
+		});
+		rc.ontrack = (e) => {
+			const [remoteStream] = e.streams;
+			console.log("[receiver] adding tracks");
+			video.srcObject = remoteStream;
+		};
 		rc.onicecandidate = (e) => {
 			console.log("[receiver] new ice candidate: ", rc.localDescription);
 		};
@@ -45,14 +59,26 @@ const VideoChat = ({ db }: { db: DB }) => {
 
 	//caller
 	const createOffer = async () => {
+		const localStream = await navigator.mediaDevices.getDisplayMedia({
+			audio: true,
+			video: true,
+		});
+		const video = document.getElementById("video-el") as HTMLVideoElement;
+		const tracks = localStream.getTracks();
+		tracks.forEach((track) => {
+			rc.addTrack(track, localStream);
+		});
+		rc.ontrack = (e) => {
+			const [remoteStream] = e.streams;
+			console.log("[caller] track event triggered");
+			video.srcObject = remoteStream;
+		};
 		const dc = rc.createDataChannel("channel");
 		dc.onmessage = (e) => console.log("Message: ", e.data);
 		dc.onopen = () => {
 			console.log("connection opened");
-			setInterval(() => {
-				dc.send("helloo");
-			}, 200);
 		};
+
 		rc.onicecandidate = (e) => {
 			console.log("[caller] new ice candidate: ", rc.localDescription);
 			db.socket.emit(
@@ -103,6 +129,7 @@ const VideoChat = ({ db }: { db: DB }) => {
 					</button>
 				</div>
 			) : null}
+			<video id="video-el" autoPlay></video>
 		</div>
 	);
 };
