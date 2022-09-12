@@ -170,6 +170,10 @@ export class Pusher {
 				}
 			);
 
+			socket.on("disconnect", () => {
+				this.activeUsers.delete(socket.id);
+			});
+
 			socket.conn.on("close", () => {
 				this.activeUsers.delete(socket.id);
 			});
