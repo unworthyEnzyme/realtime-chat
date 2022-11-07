@@ -8,3 +8,20 @@ Server doesn't do much, We only used it for auth, relaying the messages from one
 Messages are stored on the browser using indexedDB and as such there is security implications, I think when we add the webauthn we can use the generated keys for the
 encrypting and decrypting. 
 There is a `DB` class which extends the `EventTarget` so that i can listen for incoming messages from anywhere in my codebase.
+
+# Trying out the app
+Install the dependencies:
+```bash
+pnpm install
+```
+Starting the server:
+```bash
+cd apps/server
+pnpm migrate:dev
+pnpm dev
+```
+Starting the client:
+```bash
+cd apps/client
+pnpm dev
+```
