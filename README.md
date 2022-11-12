@@ -25,3 +25,4 @@ Starting the client:
 cd apps/client
 pnpm dev
 ```
+And go to `/app/chats`
